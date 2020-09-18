@@ -7,23 +7,19 @@ const awayTeam = "Manchester City WFC";
 // DATA STORAGE
 
 // Logs the detail of what each player has done
-// Has a limitation in my view in that for example unsuccessful passes don't seem to be recorded
+// Has a limitation in my view in that for example unsuccessful passes don't seem to be recorded.
+// Also probably should have factored in the follows_dribble from shooting
 const playerEventTally = {};
 
 const shots = [];
-
-// Can be used to calculate a specific match event. May not be useful as evolved the modle
-const calcMatchEvent = (team, homeOrAway, eventType, playPattern) => {
-  if (team === homeOrAway) {
-    eventType[playPattern] >= 0
-      ? eventType[playPattern]++
-      : (eventType[playPattern] = 1);
-  }
-};
+const types = [];
 
 // Creates events with players like the player event tally
 const calcEventWithPlayer = (event) => {
-  if (event.type.name === "Shot") shots.push(event);
+  // Don't need both of these long term
+  if (event.type.name === "Error") shots.push(event);
+  types.push(event.type.name);
+  // Delete two above
 
   if (event.player && event.player.name && event.type && event.type.name) {
     const player = event["player"]["name"];
@@ -41,52 +37,62 @@ const calcEventWithPlayer = (event) => {
   }
 };
 
-// Creates pass (and ideally other detail) based on each player
-const calcPlayerPassDetail = (event) => {
-  if (event.player && event.player.name && event.pass) {
+const addToEventTally = (
+  typeOfEvent,
+  player,
+  secondLevelTitle,
+  secondLevelSelector
+) => {
+  if (
+    typeOfEvent[secondLevelSelector] &&
+    typeOfEvent[secondLevelSelector]["name"]
+  ) {
+    playerEventTally[player][secondLevelTitle][secondLevelSelector][
+      typeOfEvent[secondLevelSelector].name
+    ]
+      ? (playerEventTally[player][secondLevelTitle][secondLevelSelector][
+          typeOfEvent[secondLevelSelector].name
+        ] += 1)
+      : (playerEventTally[player][secondLevelTitle][secondLevelSelector][
+          typeOfEvent[secondLevelSelector].name
+        ] = 1);
+  }
+};
+
+// This function creates and second tier fields (e.g shot, pass detail) and then calls the addToEventTally function to add them
+const calcSecondTierData = (
+  event,
+  typeOfDetail,
+  typeOfEventValue,
+  SecondTierValues,
+  distanceOrScoreSum
+) => {
+  if (event.player && event.player.name && event[typeOfEventValue]) {
     const player = event["player"]["name"];
-    const pass = event["pass"];
+    const typeOfEvent = event[typeOfEventValue];
 
-    if (!playerEventTally[player]["pass_detail"])
-      playerEventTally[player]["pass_detail"] = {
-        body_part: {},
-        height: {},
-        recipient: {},
-        total_length: 0,
-      };
+    if (!playerEventTally[player][typeOfDetail])
+      playerEventTally[player][typeOfDetail] = SecondTierValues;
 
-    if (pass["body_part"] && pass["body_part"]["name"]) {
-      playerEventTally[player]["pass_detail"]["body_part"][pass.body_part.name]
-        ? (playerEventTally[player]["pass_detail"]["body_part"][
-            pass.body_part.name
-          ] += 1)
-        : (playerEventTally[player]["pass_detail"]["body_part"][
-            pass.body_part.name
-          ] = 1);
+    const lenOf2ndTierVals = Object.keys(SecondTierValues).length;
+
+    for (let i = 0; i < lenOf2ndTierVals; i++) {
+      addToEventTally(
+        typeOfEvent,
+        player,
+        typeOfDetail,
+        Object.keys(SecondTierValues)[i]
+      );
     }
 
-    if (pass["height"] && pass["height"]["name"]) {
-      playerEventTally[player]["pass_detail"]["height"][pass.height.name]
-        ? (playerEventTally[player]["pass_detail"]["height"][
-            pass.height.name
-          ] += 1)
-        : (playerEventTally[player]["pass_detail"]["height"][
-            pass.height.name
-          ] = 1);
-    }
-
-    if (pass["recipient"] && pass["recipient"]["name"]) {
-      playerEventTally[player]["pass_detail"]["recipient"][pass.recipient.name]
-        ? (playerEventTally[player]["pass_detail"]["recipient"][
-            pass.recipient.name
-          ] += 1)
-        : (playerEventTally[player]["pass_detail"]["recipient"][
-            pass.recipient.name
-          ] = 1);
-    }
-
-    if (pass["length"]) {
-      playerEventTally[player]["pass_detail"]["total_length"] += pass["length"];
+    if (typeOfEvent[distanceOrScoreSum]) {
+      playerEventTally[player][typeOfDetail][`total_${distanceOrScoreSum}`]
+        ? (playerEventTally[player][typeOfDetail][
+            `total_${distanceOrScoreSum}`
+          ] += typeOfEvent[distanceOrScoreSum])
+        : (playerEventTally[player][typeOfDetail][
+            `total_${distanceOrScoreSum}`
+          ] = typeOfEvent[distanceOrScoreSum]);
     }
   }
 };
@@ -96,7 +102,29 @@ const makeMatchData = () => {
     const type = event["type"]["name"];
 
     calcEventWithPlayer(event);
-    calcPlayerPassDetail(event);
+    calcSecondTierData(
+      event,
+      "pass_detail",
+      "pass",
+      {
+        body_part: {},
+        height: {},
+        recipient: {},
+      },
+      "length"
+    );
+
+    calcSecondTierData(
+      event,
+      "shot_detail",
+      "shot",
+      {
+        body_part: {},
+        outcome: {},
+        technique: {},
+      },
+      "statsbomb_xg"
+    );
   });
 };
 
@@ -104,4 +132,5 @@ makeMatchData();
 
 console.log(playerEventTally);
 
-console.log(shots[0].shot);
+console.log(shots);
+console.log(new Set(types));
