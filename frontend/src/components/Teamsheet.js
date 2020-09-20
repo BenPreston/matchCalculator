@@ -1,7 +1,8 @@
 import React from "react";
 import { Table } from "react-bootstrap";
 
-export default function Teamsheet({ teamName, formation, lineups }) {
+export default function Teamsheet({ teamName, formation, lineups, onChange }) {
+  console.log(onChange);
   return (
     <Table striped bordered hover variant="dark">
       <thead>
@@ -12,11 +13,12 @@ export default function Teamsheet({ teamName, formation, lineups }) {
       </thead>
       <tbody>
         {lineups.map((footballer) => {
+          const playerName = footballer.player.name;
           return (
-            <tr key={footballer.player.id}>
+            <tr key={footballer.player.id} onClick={() => onChange(playerName)}>
               <td>{footballer.jersey_number}</td>
               <td>{footballer.position.name}</td>
-              <td>{footballer.player.name}</td>
+              <td>{playerName}</td>
             </tr>
           );
         })}

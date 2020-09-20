@@ -2,26 +2,24 @@ import React from "react";
 import Navigation from "./components/Navigation";
 import MatchData from "./components/MatchData";
 
-import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // import gameOne from "./data.json";
 
 function App() {
-
   const games = [
     {
-      'name': 'gameOne'
+      name: "gameOne",
     },
     {
-      'name': 'gameTwo'
-    }
-  ]
+      name: "gameTwo",
+    },
+  ];
 
   return (
     <div className="App container">
       <Navigation />
-      <MatchData games={games[0]}/>
+      <MatchData games={games[0]} />
     </div>
   );
 }
