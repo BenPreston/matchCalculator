@@ -2,20 +2,25 @@ import React, { Component, useState } from "react";
 import { Row, Col } from "react-bootstrap";
 
 import Teamsheet from "./Teamsheet";
+
 import DataWidget from "./DataWidget.js";
 
-import "./matchData.css";
 // Obviously I'm importing this data locally but this needs to be a dynamic API or saved in my Mongo really but that's next step
 import { data } from "./data";
 
 function MatchData() {
-  // const [playerNameState, setplayerNameState] = useState("Select your player");
-  const [playerNameState, setplayerNameState] = useState("Christiano Ronaldo");
-  const [playerState, setPlayerState] = useState({ name: "Ben", shot: 4 });
+  // Set a state, need to change this for global game stats as a loader I think
+  const [playerState, setPlayerState] = useState({
+    click: "on a player",
+    for: "stats",
+  });
 
+  // Stores a record of every player with their main stats
   const playerEventTally = [];
+  // Stores the starting 11
   const starting11 = [];
 
+  // Looks up a player based on click and sets state to that to show stats
   const lookUpPlayer = async (playerName) => {
     const newPlayer = await playerEventTally.find(
       (player) => player.name === playerName
@@ -23,6 +28,7 @@ function MatchData() {
     setPlayerState(newPlayer);
   };
 
+  // Sets starting 11 and makes all of the stats based on the relevant game events
   const calcEventWithPlayer = (event) => {
     if (event.type.name === "Starting XI") {
       starting11.push(event);
@@ -48,28 +54,26 @@ function MatchData() {
     }
   };
 
+  // Data imported to deliver these stats
   data.map((event) => calcEventWithPlayer(event));
 
   return (
     <div>
-      <h1>Match data</h1>
-      <h2>{playerNameState}</h2>
-      {console.log(playerEventTally)}
+      <h1>
+        {starting11[0].team.name} vs {starting11[1].team.name}
+      </h1>
       <Row className="justify-content-md-center">
         <Col>
-          {" "}
-          <Teamsheet
-            teamName={starting11[0].team.name}
-            formation={starting11[0].tactics.formation}
-            lineups={starting11[0].tactics.lineup}
-            onChange={(selectedPlayer) => lookUpPlayer(selectedPlayer)}
-          />{" "}
-          <Teamsheet
-            teamName={starting11[1].team.name}
-            formation={starting11[1].tactics.formation}
-            lineups={starting11[1].tactics.lineup}
-            onChange={(selectedPlayer) => setplayerNameState(selectedPlayer)}
-          />
+          {starting11.map((teamName) => {
+            return (
+              <Teamsheet
+                teamName={teamName.team.name}
+                formation={teamName.tactics.formation}
+                lineups={teamName.tactics.lineup}
+                onChange={(selectedPlayer) => lookUpPlayer(selectedPlayer)}
+              />
+            );
+          })}
         </Col>
         <DataWidget player={playerState} />
       </Row>
