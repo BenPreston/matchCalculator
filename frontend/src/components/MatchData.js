@@ -1,11 +1,12 @@
 import React, { Component, useState } from "react";
 import { Row, Col } from "react-bootstrap";
 
+import DataWidget from "./DataWidget";
 import Teamsheet from "./Teamsheet";
 
-import DataWidget from "./DataWidget.js";
+import "./matchData.css";
 
-// Obviously I'm importing this data locally but this needs to be a dynamic API or saved in my Mongo really but that's next step
+// Data imported locally - in future dynamic API
 import { data } from "./data";
 
 function MatchData() {
@@ -59,24 +60,22 @@ function MatchData() {
 
   return (
     <div>
-      <h1>
+      <h1 className="team_names_heading">
         {starting11[0].team.name} vs {starting11[1].team.name}
       </h1>
       <Row className="justify-content-md-center">
-        <Col>
-          {starting11.map((teamName) => {
-            return (
-              <Teamsheet
-                teamName={teamName.team.name}
-                formation={teamName.tactics.formation}
-                lineups={teamName.tactics.lineup}
-                onChange={(selectedPlayer) => lookUpPlayer(selectedPlayer)}
-              />
-            );
-          })}
-        </Col>
-        <DataWidget player={playerState} />
+        {starting11.map((teamName) => {
+          return (
+            <Teamsheet
+              teamName={teamName.team.name}
+              formation={teamName.tactics.formation}
+              lineups={teamName.tactics.lineup}
+              onChange={(selectedPlayer) => lookUpPlayer(selectedPlayer)}
+            />
+          );
+        })}
       </Row>
+      <DataWidget player={playerState} />
     </div>
   );
 }

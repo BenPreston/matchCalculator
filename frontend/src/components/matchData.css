@@ -1,0 +1,10 @@
+.team_names_heading {
+  text-align: center;
+}
+
+table {
+  max-width: 400px;
+  text-align: center;
+  float: left;
+  margin: 5px 15px;
+}

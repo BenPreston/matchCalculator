@@ -1,14 +1,14 @@
 import React from "react";
-import { Col, Row } from "react-bootstrap";
+import { Col, Row, Table } from "react-bootstrap";
 import "./dataWidget.css";
 
 export default function DataWidget({ player }) {
   const playerStatsList = Object.entries(player).map(([key, value]) => {
     return (
-      <Row>
-        <div className="data_field data_title">{key}: </div>
-        <div className="data_field data_box">{value.toString()}</div>
-      </Row>
+      <tr>
+        <th className="data_field data_title">{key}: </th>
+        <td className="data_field data_box">{value.toString()}</td>
+      </tr>
     );
   });
 
