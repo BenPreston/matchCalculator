@@ -1,7 +1,6 @@
-import React, { Component, useState } from "react";
-import { Row, Col } from "react-bootstrap";
+import React, { useState } from "react";
+import { Row } from "react-bootstrap";
 
-import DataWidget from "./DataWidget";
 import Teamsheet from "./Teamsheet";
 
 import "./matchData.css";
@@ -71,11 +70,11 @@ function MatchData() {
               formation={teamName.tactics.formation}
               lineups={teamName.tactics.lineup}
               onChange={(selectedPlayer) => lookUpPlayer(selectedPlayer)}
+              player={playerState}
             />
           );
         })}
       </Row>
-      <DataWidget player={playerState} />
     </div>
   );
 }
